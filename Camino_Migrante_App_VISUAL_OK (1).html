@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camino Migrante - Versión Estable</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      gap: 10px;
+      justify-content: center;
+      margin: 30px auto;
+    }
+    .cell {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: #ecf0f1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    .player {
+      background-color: gold !important;
+    }
+    .obstacle {
+      background-color: #e74c3c;
+      color: white;
+    }
+    .support {
+      background-color: #2ecc71;
+      color: white;
+    }
+    .decision {
+      background-color: #f39c12;
+      color: white;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #message {
+      margin-top: 20px;
+      white-space: pre-line;
+      font-size: 16px;
+      color: #34495e;
+    }
+  </style>
+</head>
+<body>
+  <h1>Camino Migrante</h1>
+  <div id="board"></div>
+  <button onclick="rollDice()">Tirar el dado 🎲</button>
+  <div id="message"></div>
+
+  <script>
+    const board = document.getElementById('board');
+    const message = document.getElementById('message');
+
+    const cellTypes = [
+      'normal', 'normal', 'obstacle', 'support', 'decision',
+      'normal', 'obstacle', 'support', 'normal', 'decision',
+      'support', 'normal', 'obstacle', 'normal', 'decision',
+      'normal', 'support', 'obstacle', 'normal', 'normal'
+    ];
+
+    const obstacleCards = [
+      '🟥 Redada migratoria en tu zona. Perdés un turno.',
+      '🟥 Solicitud de asilo rechazada. Retrocedés 2 casillas.',
+      '🟥 Centro de detención. Saltás un turno.',
+      '🟥 Problemas con papeles. Volvés al inicio.'
+    ];
+
+    const supportCards = [
+      '🟩 ONG te da ayuda legal. Avanzás 2 casillas.',
+      '🟩 Conseguís trabajo temporal. Avanzás 1 casilla.',
+      '🟩 Un vecino te da alojamiento. +1 al próximo dado.',
+      '🟩 Recibís apoyo psicológico. Recuperás un turno perdido.'
+    ];
+
+    const decisionCards = [
+      '🟨 ¿Solicitás asilo o esperás patrocinio?
+A) Avanzás 2 casillas
+B) Perdés un turno.',
+      '🟨 ¿Refugio o trabajo informal?
+A) Avanzás 1
+B) Riesgo de retroceder 1.',
+      '🟨 ¿Pedís TPS o cruzás sin papeles?
+A) Tirás dado
+B) Retrocedés 2.',
+      '🟨 ¿Denunciás una injusticia?
+A) Avanzás
+B) Te quedás.'
+    ];
+
+    let playerPosition = 0;
+
+    function drawBoard() {
+      board.innerHTML = '';
+      for (let i = 0; i < 20; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell ' + cellTypes[i];
+        if (i === playerPosition) cell.classList.add('player');
+        cell.textContent = i + 1;
+        board.appendChild(cell);
+      }
+    }
+
+    function rollDice() {
+      const roll = Math.floor(Math.random() * 6) + 1;
+      let newPos = playerPosition + roll;
+      if (newPos >= 19) {
+        playerPosition = 19;
+        drawBoard();
+        message.textContent = `Sacaste un ${roll}. ¡Llegaste a la meta! 🎉`;
+        return;
+      }
+
+      let eventText = `Sacaste un ${roll}. Estás en la casilla ${newPos + 1}.
+`;
+
+      const cell = cellTypes[newPos];
+
+      if (cell === 'obstacle') {
+        eventText += obstacleCards[Math.floor(Math.random() * obstacleCards.length)];
+      } else if (cell === 'support') {
+        eventText += supportCards[Math.floor(Math.random() * supportCards.length)];
+        newPos = Math.min(19, newPos + 1);
+      } else if (cell === 'decision') {
+        eventText += decisionCards[Math.floor(Math.random() * decisionCards.length)];
+      }
+
+      playerPosition = newPos;
+      drawBoard();
+      message.textContent = eventText;
+    }
+
+    drawBoard();
+  </script>
+</body>
+</html>
